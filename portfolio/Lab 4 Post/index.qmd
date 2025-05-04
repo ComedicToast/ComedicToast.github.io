@@ -1,0 +1,22 @@
+---
+title: "Lab 4 Blog Post"
+description: "Shiny R Quarto Dashboards"
+author:
+  - name: ComedicToast
+    url: https://github.com/ComedicToast.io
+date: 5-4-2025
+categories: [Quarto, R] # self-defined categories
+image: thumbnail.png
+draft: true # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+---
+
+
+<center>
+
+<iframe src="https://ywnwdr-zachary-felix.shinyapps.io/lab-4/" frameborder="0" width="1440" height="853" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true">
+
+</iframe>
+
+</center>
+
+

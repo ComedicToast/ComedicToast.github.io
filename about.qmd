@@ -2,8 +2,4 @@
 title: "About"
 ---
 
-About this site
-
-```{r}
-1 + 1
-```
+This website showcases the different labs for STAT 541. It is intended to be a portfolio showcasing the skills acquired in the class.

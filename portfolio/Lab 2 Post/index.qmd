@@ -79,11 +79,11 @@ There are two worksheets in the downloaded dataset file. You may need to read th
 ```{r}
 #| label: read-in-wellcome-data
 
-crosstabs <- read_excel(here("portfolio", "Lab 2 Post" ,"wgm2018.xlsx"), sheet=1, skip=2)
-full_data <- read_excel(here("portfolio", "Lab 2 Post" ,"wgm2018.xlsx"), sheet=2)
-dictionary <- read_excel(here("portfolio", "Lab 2 Post" ,"wgm2018.xlsx"), sheet=3)
+crosstabs <- read_excel(here("data","wgm2018.xlsx"), sheet=1, skip=2)
+full_data <- read_excel(here("data" ,"wgm2018.xlsx"), sheet=2)
+dictionary <- read_excel(here("data" ,"wgm2018.xlsx"), sheet=3)
 #this is cleaned data for q1 specifically
-cleaned <- read.csv(here("portfolio", "Lab 2 Post" ,"wgm_cleaned.csv"))
+cleaned <- read.csv(here("data" ,"wgm_cleaned.csv"))
 
 ```
 
@@ -336,7 +336,7 @@ Make the leaflet map
 #| message: false
 
 # Load GeoJSON
-WorldCountry <- st_read(here("portfolio", "Lab 2 Post" ,"countries.geo.json"))
+WorldCountry <- st_read(here("data" ,"countries.geo.json"))
 
 #join q2data and drop na's
 WorldCountry <-WorldCountry %>%
