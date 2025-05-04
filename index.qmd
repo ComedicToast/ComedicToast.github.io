@@ -3,7 +3,6 @@ title: "ComedicToast"
 image: media/omogi.png
 about: 
   template: jolla
-  
   links:
     - text: GitHub
       href: https://github.com/ComedicToast
