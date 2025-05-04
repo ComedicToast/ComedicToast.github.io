@@ -7,7 +7,7 @@ author:
 date: 5-4-2025
 categories: [Quarto, R] # self-defined categories
 image: thumbnail.png
-draft: true # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
 ---
 
 <center>
