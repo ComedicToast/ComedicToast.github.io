@@ -10,9 +10,10 @@ image: thumbnail.png
 draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
 ---
 
+
 <center>
 
-<iframe src="https://comedictoast.github.io/lab-3/lab-3.html#trust-in-scientists" frameborder="0" width="1440" height="853" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true">
+<iframe src="https://comedictoast.github.io/lab-3/lab-3.html" frameborder="0" width="1440" height="853" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true">
 
 </iframe>
 
