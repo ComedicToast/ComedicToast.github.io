@@ -1,0 +1,457 @@
+---
+title: "Lab 6 Blog Post"
+description: "Functions and Code Efficiency"
+author:
+  - name: ComedicToast
+    url: https://github.com/ComedicToast.io
+date: 5-11-2025
+categories: [Quarto, R] # self-defined categories
+image: thumbnail.jpg
+draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
+---
+
+
+The exercises from the functions below were pulled from the newest version of
+[*R for Data Science*](https://r4ds.hadley.nz/). Specifically, from Chapters 25 
+and 26. For this "alternative" lab you will complete the exercises from the 
+textbook, with the option of submitting a pull request to the 
+[repository for the textbook solutions](https://github.com/mine-cetinkaya-rundel/r4ds-solutions/).
+
+```{r}
+#| message: false
+library(tidyverse)
+library(nycflights13)
+```
+
+
+# Vector Functions
+
+**Question 1:** The `rescale01()` function below performs a min-max scaling to 
+standardize a numeric vector, but infinite values are left unchanged. Rewrite
+`rescale01()` so that `-Inf` is mapped to 0, and `Inf` is mapped to 1?
+*Hint: This seems like a great place for `case_when()`!
+
+```{r}
+#| label: question-1
+
+rescale01 <- function(x) {
+  if (!is.vector(x)) {
+    stop("The input for `x` must be a vector.")
+  }
+
+  
+  x <- case_when(
+    x == Inf ~ 1,
+    x == -Inf ~ 0,
+    TRUE ~ x
+  )
+  rng <- range(x, na.rm = TRUE, finite = TRUE)
+  (x - rng[1]) / (rng[2] - rng[1])
+}
+
+rescale01(c(1, 2, 3, 4, 5, Inf, -Inf))
+```
+
+
+**Question 2:** Write a function that accepts a vector of birthdates and 
+computes the age of each person in years.
+
+```{r}
+#| label: question-2
+age_calc <- function(birthdates) {
+  if (!is.vector(birthdates)) {
+    stop("The input for `birthdates` must be a vector.")
+  }
+  
+  birthdates <- as.Date(birthdates)
+  today <- Sys.Date()
+  ages <- as.integer((today - birthdates) / 365.25) 
+  return(ages)
+}
+
+age_calc(c("2001-08-30", "2003-08-08", "2005-08-31", "1100-03-07"))
+```
+
+**Question 3:** Write a function that computes the variance and skewness of a
+numeric vector. Feel free to look up the definitions on Wikipedia or elsewhere!
+
+```{r}
+#| label: question-3
+var_skew <- function(x){
+  if (!is.vector(x)) {
+    stop("The input for `x` must be a vector.")
+  }
+  
+  variance <- var(x)
+  
+  n <- length(x)
+  mean <- mean(x)
+  sd <- sd(x)
+  
+  skewness <- (sum((x - mean)^3)/(n * sd^3))
+  return(list(variance = variance, skewness = skewness))
+}
+
+var_skew(c(1,2,3,4,11037))
+```
+
+**Question 4:** Write a function called `both_na()` which takes two vectors of
+the same length and returns the number of positions that have an `NA` in both
+vectors.
+
+```{r}
+#| label: question-4
+both_na <- function(V1, V2){
+  if (!is.vector(V1) | !is.vector(V2)) {
+    stop("The input for `V1` and 'V2' must be a vector.")
+  }
+  
+  if (length(V1) != length(V2)) {
+    stop("make those vectors the same length or ELSE")
+  }
+  
+  total_both_na_positions <- sum(is.na(V1) & is.na(V2))
+  return(total_both_na_positions)
+  
+}
+
+both_na(c(NA, NA, 11037), c(NA, 1, 2))
+```
+
+
+## Data Frame Functions
+
+**Question 5:** Insert the data frame function you wrote from Lab 6 (either
+Exercise 1 or Exercise 2). 
+
+```{r}
+#| label: function-from-lab-2
+
+remove_outliers <- function(df, ..., sd_thresh = 3){
+  
+  #error cases for df and sd_thresh
+  if (!is.data.frame(df)) {
+    stop("df must be a data frame please!!!!!!!")
+  }
+  if (!is.numeric(sd_thresh) | sd_thresh <= 0) {
+    stop("sd_thresh has to be a positive number please!!!!!!")
+  }
+  
+  #turn everything in ellipses to quosures
+  names_quosures <- enquos(...)
+  #take everything in names_quosures and extracts the names as character strings
+  names <- map_chr(names_quosures, quo_name)
+  
+  #error cases for the names/...
+  if (length(names) < 1) {
+    stop("provide column names to remove outliers from please bro")
+  }
+  if (!is.character(names)) {
+    stop("column names must be character strings!! ")
+  }
+  if (!all(names %in% names(df))) {
+    stop("the column(s) are not in the data frame :(")
+  }
+  
+  #meat of the function. check if the col is numeric, calc z score and then . way to do this without for looping?
+  df_RO <- df
+  for (name in names) {
+    if (!is.numeric(df_RO[[name]])) {
+      warning(paste("Skipping non-numeric column ", name))
+      next
+    }
+    mean <- mean(df_RO[[name]], na.rm = TRUE)
+    sd <- sd(df_RO[[name]], na.rm = TRUE)
+    abs_z <- abs((df_RO[[name]] - mean) / sd)
+    df_RO <- df_RO[abs_z <= sd_thresh | is.na(abs_z), ]
+  }
+  return(df_RO)
+}
+
+## Testing how your function handles multiple input variables
+remove_outliers(diamonds, 
+                price, 
+                x, 
+                y, 
+                z)
+
+## Testing how your function handles an input that isn't numeric
+remove_outliers(diamonds, 
+                price, 
+                color)
+
+## Testing how your function handles a non-default sd_thresh
+remove_outliers(diamonds, 
+                price,
+                x, 
+                y, 
+                z, 
+                sd_thresh = 2)
+```
+
+For Questions 6 - 10 you will write different functions which work with data 
+similar to the `nycflights13` data. 
+
+```{r}
+#| include: false
+df <- head(nycflights13::flights)
+```
+
+
+**Question 6:** Write a `filter_severe()` function that finds all flights that
+were cancelled (i.e. `is.na(arr_time)`) or delayed by more than an hour.
+
+```{r}
+#| label: question-6
+
+#assuming arrival or departure delay
+filter_severe <- function(df, arrival_delay_var, departure_delay_var, arrival_time_var){
+
+#checks to make sure all the supplied columns are numeric
+    non_num <- df %>%
+    select( {{ arrival_delay_var }}, {{departure_delay_var}}, {{arrival_time_var}}) %>%
+    sapply(is.numeric)
+
+  if (!all(non_num)) {
+    stop(
+      str_c("One of the columns you entered is not numeric.")
+      )
+  }
+  
+  
+  filtered_df <- df %>%
+    filter(is.na({{arrival_time_var}}) | {{arrival_delay_var}} > 60 | {{departure_delay_var}} > 60)
+  
+  return(filtered_df)
+}
+
+filter_severe(flights, arr_delay, dep_delay, arr_time)
+```
+
+
+
+**Question 7:** Write a `summarize_severe()` function that counts the number of 
+cancelled flights and the number of flights delayed by more than an hour.
+
+```{r}
+#| label: question-7
+summarize_severe <- function(df, arrival_delay_var, departure_delay_var, arrival_time_var){
+  
+  
+#checks to make sure all the supplied columns are numeric
+    non_num <- df %>%
+    select( {{ arrival_delay_var }}, {{departure_delay_var}}, {{arrival_time_var}}) %>%
+    sapply(is.numeric)
+
+  if (!all(non_num)) {
+    stop(
+      str_c("One of the columns you entered is not numeric.")
+      )
+  }
+  
+  
+  cancelled_count <- df %>%
+    filter(is.na({{arrival_time_var}})) %>%
+    count()
+  
+  delayed_count <- df %>%
+    filter({{arrival_delay_var}} > 60 | {{departure_delay_var}} > 60) %>%
+    count()
+  
+  output <- paste0("There are ", cancelled_count, " cancelled flights and there are ", delayed_count, " delayed flights, counting both arrival and departure delays.")
+  return(output)
+  
+}
+
+summarize_severe(flights, arr_delay, dep_delay, arr_time)
+```
+
+**Question 8:** Modify your `filter_severe()` function to allow the user to 
+supply the number of hours that should be used to filter the flights that were
+cancelled or delayed. 
+
+```{r}
+#| label: question-8
+
+#assuming arrival or departure delay
+filter_severe <- function(df, arrival_delay_var, departure_delay_var, arrival_time_var, hours = 1){
+
+#checks to make sure all the supplied columns are numeric
+    non_num <- df %>%
+    select( {{ arrival_delay_var }}, {{departure_delay_var}}, {{arrival_time_var}}) %>%
+    sapply(is.numeric)
+
+  if (!all(non_num)) {
+    stop(
+      str_c("One of the columns you entered is not numeric.")
+      )
+  }
+    
+  if (!is.numeric({{hours}})) {
+    stop(
+      str_c("You must use a number for the `hours` input!")
+      )
+  }
+  
+  
+  filtered_df <- df %>%
+    filter(is.na({{arrival_time_var}}) | {{arrival_delay_var}} > hours*60 | {{departure_delay_var}} > hours*60)
+  
+  return(filtered_df)
+}
+
+filter_severe(flights, arr_delay, dep_delay, arr_time, hours=3)
+```
+
+**Question 9:** Write a `summarize_weather()` function that summarizes the
+weather to compute the minimum, mean, and maximum, of a user supplied variable. 
+
+```{r}
+#| include: false
+df <- head(nycflights13::weather, n=100)
+
+nrow(nycflights13::weather)
+```
+
+
+```{r}
+#| label: question-9
+
+summarize_weather <- function(df, variable){
+  
+  non_num <- df %>%
+    pull( {{ variable }}) %>%
+    is.numeric()
+  
+   if (!non_num) {
+    stop(
+      str_c("You must use a numeric variable for the `variable` input!")
+      )
+  }
+  
+  df %>%
+    summarize(
+      min = min({{variable}}, na.rm = TRUE),
+      mean = mean({{variable}}, na.rm = TRUE),
+      max = max({{variable}}, na.rm=TRUE)
+    )
+    
+}
+
+summarize_weather(weather, temp)
+```
+
+
+
+**Question 10:** Write a `standardize_time()` function that converts the user
+supplied variable that uses clock time (e.g., `dep_time`, `arr_time`, etc.) into
+a decimal time (i.e. hours + (minutes / 60)).
+
+```{r}
+#| include: false
+df <- head(nycflights13::flights, n=1000)
+```
+
+```{r}
+#| label: question-10
+standardize_time <- function(df, clock_time){
+  non_num <- df %>%
+    pull({{ clock_time }}) %>%
+    is.numeric()
+  
+   if (!non_num) {
+    stop(
+      str_c("You must use a numeric variable for the `clock_time` input!")
+      )
+  }
+  
+  df %>%
+    mutate(
+      {{clock_time}} := case_when(
+        !is.na({{clock_time}}) ~ floor({{clock_time}}/100) + ({{clock_time}} %% 100) / 60
+      )
+    )
+  
+  
+}
+
+standardize_time(flights, dep_time)
+
+```
+
+
+# Plotting Functions
+
+You might want to read over the [Plot Functions section of *R for Data Science*](https://r4ds.hadley.nz/functions.html#plot-functions)
+
+**Question 11:** Build a `sorted_bars()` function which:
+
+- takes a data frame and a variable as inputs and returns a **vertical** bar
+chart 
+- sorts the bars in decreasing order (largest to smallest)
+- adds a title that includes the context of the variable being plotted
+
+*Hint 1: The `fct_infreq()` and `fct_rev()` functions from the forcats package will be helpful for sorting the bars!*
+*Hint 2: The `englue()` function from the rlang package will be helpful for adding a variable's name into the plot title!*
+
+I also made it so that if a variable had more than 10 unique values, the bar chart would be horizontal since the names of each category tend to blend together when the bar chart is vertical.
+
+```{r}
+#| label: question-11
+
+sorted_bars <- function(df, var){
+  #check if var is correct data type
+  non_char_ord <- df %>%
+    pull({{ var }}) %>%
+    (\(x)is.character(x) | is.ordered(x) | is.factor(x))
+  
+   if (!non_char_ord) {
+    stop(
+      str_c("You must use a character or factor for the `var` input!")
+      )
+  }
+  #use enquo to pull name of var
+  var_name <- rlang::as_name(enquo(var))
+  
+  #count unique # of columns to determine if coord flipping later
+  total_vals <- n_distinct(df %>% pull({{ var }}))
+  
+  p <- df %>%
+    ggplot(aes(x = fct_infreq(as.factor({{var}})))) +
+    geom_bar() +
+    labs(
+      title = rlang::englue("Distribution of { var_name }"),
+      x = var_name,
+      y = "Count"
+    ) +
+    theme_minimal() +
+    theme(
+      panel.grid.major.x = element_blank()
+    )
+  
+  if (total_vals > 10) {
+    p <- p + coord_flip()
+  }
+  
+  return(p)
+}
+
+sorted_bars(diamonds, clarity)
+```
+
+# Iteration
+
+Alright, now let's take our plotting function and iterate it! 
+
+**Question 12:** Make a sorted barplot for every character variable in the `mpg`
+dataset (built into `ggplot2`). 
+
+```{r}
+#| label: question-12
+
+char_vars <- mpg %>%
+  select(where(is.character)) %>%
+  names()
+
+map(char_vars, ~sorted_bars(mpg, !!sym(.x)))
+```
