@@ -45,129 +45,76 @@ state_capitals_clean <- state_capitals %>%
 
 ## Function 1 to get all relevant json info
 
-```{r}
-# 
-get_json_info <- function(df){
-  #make empty list
-  results <- list() 
 
-  #iterate through the df to get each state, lat, long, and plug each into url.
-  for(i in 1:nrow(df)){
-    state <- df$state[i]
-    latitude <- df$latitudes[i]
-    longitude <- df$longitudes[i]
-    url <- paste0("https://api.g7vrd.co.uk/v1/satellite-passes/25544/", latitude, "/", longitude, ".json")
-    
-    # make an API request for each url
+```{r}
+# Function to get JSON info
+get_json_info_cleaned <- function(df) {
+  # pmap iterates by state, lat and long to get everything we need in a list
+  results <- purrr::pmap(df, function(state, latitudes, longitudes) {
+    url <- paste0("https://api.g7vrd.co.uk/v1/satellite-passes/25544/", latitudes, "/", longitudes, ".json")
+  # get results from the url
     response <- GET(url)
-    
-    #if the response works
+  # if there were no issues
     if (http_status(response)$category == "Success") {
-      
-      # grab the json content, the first 3 satellite passes
+      #grab the json char data
       json_data <- fromJSON(rawToChar(response$content))
-      passes_data <- head(json_data$passes$tca,3)
-      
-      # Store the relevant data in the list
-      results[[i]] <- list(state = state, latitude = latitude, longitude = longitude, passes = passes_data)
+      passes_data <- head(json_data$passes$tca, 3)
+      #store in a list
+      list(state = state, latitude = latitudes, longitude = longitudes, passes = passes_data)
+    } else {
+      #error message otherwise
+      warning(paste0("Error fetching data for ", state, " (lat: ", latitudes, ", long: ", longitudes, "): ", http_status(response)$message))
+      list(state = state, latitude = latitudes, longitude = longitudes, error = http_status(response)$message)
     }
-    
-    #if the response didn't work
-    else {
-      cat("Error fetching data for latitude:", latitude, ", longitude:", longitude)
-      
-      results[[i]] <- list(state = state, latitude = latitude, longitude = longitude, error = http_status(response)$message)
-    }
-  }
-  #after the looping, return the list
+  })
   return(results)
 }
-
-api_data <- get_json_info(state_capitals_clean)
-
-# used Gemini to help with the above function
 ```
 
 ## Function 2 to convert it to a nice df
 
 ```{r}
-convert_api_to_df <- function(api_data) {
- 
-   # make vectors to store state/lat/long
-  states <- character(length(api_data))
-  latitudes <- numeric(length(api_data))
-  longitudes <- numeric(length(api_data))
-  
-  # create a list to store all pass values
-  all_passes <- vector("list", length(api_data))
-  
-  # initialize the var telling us how many satellite passes (up to 3)
-  max_passes <- 0
-  
-# grab data from each state entry
-  
-  # for every state
-  for (i in 1:length(api_data)) {
-    #store the state specific data for state i
-    state_data <- api_data[[i]]
-    
-    #grab the state specifc data for the df
-    states[i] <- state_data[[1]]  # state
-    latitudes[i] <- state_data[[2]]  # lat
-    longitudes[i] <- state_data[[3]]  # long
-    
-    # store passes and update max_passes (if needed) for the df
-    passes <- state_data[[4]]
-    all_passes[[i]] <- passes
-    max_passes <- max(3, length(passes))
-  }
-  
-  # structure the final df
-  df <- data.frame(
-    state = states,
-    latitude = latitudes,
-    longitude = longitudes
-  )
-  
-# add satellite pass columns based on the maximum number found
-  
-  # for every pass
-  for (p in 1:max_passes) {
-    #create vector to hold pass time 
-    pass_col <- character(length(api_data))
-    
-    # for each state
-    for (i in 1:length(api_data)) {
-      #grab list of passes for current state
-      passes <- all_passes[[i]]
-      #if the pass position exisits for current state
-      if (p <= length(passes)) {
-        #put the pass time in the pass_col vector
-        pass_col[i] <- passes[p]
-      } else {
-        #otherwise put NA in the vector
-        pass_col[i] <- NA
-      }
+api_data_cleaned <- get_json_info_cleaned(state_capitals_clean)
+
+# Function to convert API data to a nice df 
+convert_api_to_df_cleaned <- function(api_data) {
+  # Extract core information using map_dfr for a data frame
+  df_core <- purrr::map_dfr(api_data, function(item) {
+    data.frame(
+      state = item$state,
+      latitude = item$latitude,
+      longitude = item$longitude
+    )
+  })
+
+  # grab passes and make sure all have 3, fill with NA if fewer
+  all_passes_padded <- purrr::map(api_data, function(item) {
+    passes <- item$passes
+    if (is.null(passes)) { # Handle cases where there might be an error and no passes
+      return(rep(NA_character_, 3))
     }
-    
-    # make name of pass column for the dataframe
-    colname <- paste0("pass", p)
-    #add col to the dataframe
-    df[[colname]] <- pass_col
-  }
-  
-  return(df)
+    length(passes) <- 3 # Pad with NA if less than 3, truncates if more than 3
+    return(passes)
+  })
+
+  # Convert the list of passes into df by rowbinding with do.call
+  passes_df <- as.data.frame(do.call(rbind, all_passes_padded))
+  colnames(passes_df) <- paste0("pass", 1:ncol(passes_df))
+
+  # Combine the core data frame with the passes data frame
+  final_df <- cbind(df_core, passes_df)
+
+  return(final_df)
 }
 
-final_state_capitals <- convert_api_to_df(api_data)
-
-# Used Claude to help with the above funciton
+final_state_capitals_cleaned <- convert_api_to_df_cleaned(api_data_cleaned)
 ```
+
 
 ### Converting to Readable Times and Joining Capital Names
 
 ```{r}
-final_state_capitals <- final_state_capitals %>%
+final_state_capitals <- final_state_capitals_cleaned %>%
   inner_join(state_capitals_name, by = join_by(state == V1)) %>%
   mutate(capital_name = V2,
          pass1 = ymd_hms(pass1, tz = "UTC"),
