@@ -10,7 +10,6 @@ image: thumbnail.png
 draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
 ---
 
-
 <center>
 
 <iframe src="https://ywnwdr-zachary-felix.shinyapps.io/lab-4/" frameborder="0" width="1440" height="853" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true">
@@ -18,5 +17,3 @@ draft: false # setting this to `true` will prevent your post from appearing on y
 </iframe>
 
 </center>
-
-
