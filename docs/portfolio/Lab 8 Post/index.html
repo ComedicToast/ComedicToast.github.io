@@ -10763,40 +10763,40 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <p>(Just 10 to avoid overtaxing the website! Continue adding a 1 second pause between page queries.)</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to scrape a single cheese</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>scrape_cheese <span class="ot">&lt;-</span> <span class="cf">function</span>(cheese, base_url, <span class="at">delay =</span> <span class="dv">1</span>) {</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">#set up page url to grab </span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  page_url <span class="ot">&lt;-</span> <span class="fu">paste0</span>(base_url, cheese, <span class="st">"/"</span>)</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">#include sys delay so we don't overload the website</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Sys.sleep</span>(delay)</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># This is a cool new thing that Claude included in its revision. tryCatch handles errors pretty nicely</span></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># It gives a structure to any errors that occurs and still gives a blank df as output</span></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tryCatch</span>({</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># read the webpage url</span></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    webpage <span class="ot">&lt;-</span> <span class="fu">read_html</span>(page_url)</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># helper function to grab from each css instead of copy pasting 5 blocks for each css</span></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    get_cheese_attribute <span class="ot">&lt;-</span> <span class="cf">function</span>(css) {</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>      result <span class="ot">&lt;-</span> webpage <span class="sc">%&gt;%</span></span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>        <span class="fu">html_elements</span>(<span class="fu">paste0</span>(<span class="st">"."</span>, css, <span class="st">" p"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>        <span class="fu">html_text</span>(<span class="at">trim =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>      </span>
-<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>      <span class="co"># return empty string if nothing is found</span></span>
-<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(<span class="fu">length</span>(result) <span class="sc">==</span> <span class="dv">0</span>) <span class="fu">return</span>(<span class="st">""</span>)</span>
-<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>      result[<span class="dv">1</span>]</span>
-<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># grab and store every desired attribute</span></span>
-<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    cheese_taste <span class="ot">&lt;-</span> <span class="fu">get_cheese_attribute</span>(<span class="st">"summary_taste"</span>)</span>
-<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    cheese_milk <span class="ot">&lt;-</span> <span class="fu">get_cheese_attribute</span>(<span class="st">"summary_milk"</span>)</span>
-<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    cheese_type <span class="ot">&lt;-</span> <span class="fu">get_cheese_attribute</span>(<span class="st">"summary_moisture_and_type"</span>)</span>
-<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    cheese_family <span class="ot">&lt;-</span> <span class="fu">get_cheese_attribute</span>(<span class="st">"summary_family"</span>)</span>
-<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    cheese_country <span class="ot">&lt;-</span> <span class="fu">get_cheese_attribute</span>(<span class="st">"summary_country"</span>)</span>
-<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># return the dataframe with everything, with some additional string cutting</span></span>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Helper function to extract text content from a specified CSS selector on a webpage</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>get_cheese_attribute <span class="ot">&lt;-</span> <span class="cf">function</span>(webpage, css) {</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  result <span class="ot">&lt;-</span> webpage <span class="sc">%&gt;%</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">html_elements</span>(<span class="fu">paste0</span>(<span class="st">"."</span>, css, <span class="st">" p"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">html_text</span>(<span class="at">trim =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Return an empty string if nothing is found, otherwise return the first result</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(result) <span class="sc">==</span> <span class="dv">0</span>) <span class="fu">return</span>(<span class="st">""</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  result[<span class="dv">1</span>]</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to scrape a single cheese</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>scrape_cheese <span class="ot">&lt;-</span> <span class="cf">function</span>(cheese, base_url, <span class="at">delay =</span> <span class="dv">1</span>) {</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Set up page URL to grab</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  page_url <span class="ot">&lt;-</span> <span class="fu">paste0</span>(base_url, cheese, <span class="st">"/"</span>)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Include system delay so we don't overload the website</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Sys.sleep</span>(delay)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># tryCatch handles errors nicely, providing a structured way to manage them</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>  <span class="co"># and still return a blank data frame as output in case of an error.</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tryCatch</span>({</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Read the webpage URL</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    webpage <span class="ot">&lt;-</span> <span class="fu">read_html</span>(page_url)</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Grab and store every desired attribute using the external helper function</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    cheese_taste <span class="ot">&lt;-</span> <span class="fu">get_cheese_attribute</span>(webpage, <span class="st">"summary_taste"</span>)</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    cheese_milk <span class="ot">&lt;-</span> <span class="fu">get_cheese_attribute</span>(webpage, <span class="st">"summary_milk"</span>)</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    cheese_type <span class="ot">&lt;-</span> <span class="fu">get_cheese_attribute</span>(webpage, <span class="st">"summary_moisture_and_type"</span>)</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    cheese_family <span class="ot">&lt;-</span> <span class="fu">get_cheese_attribute</span>(webpage, <span class="st">"summary_family"</span>)</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    cheese_country <span class="ot">&lt;-</span> <span class="fu">get_cheese_attribute</span>(webpage, <span class="st">"summary_country"</span>)</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return the data frame with all scraped attributes, with some additional string cutting</span></span>
 <span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(</span>
 <span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>      <span class="at">Name =</span> cheese,</span>
 <span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>      <span class="at">Taste =</span> <span class="fu">sub</span>(<span class="st">".*:</span><span class="sc">\\</span><span class="st">s*"</span>, <span class="st">""</span>, cheese_taste),</span>
@@ -10805,51 +10805,37 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>      <span class="at">Family =</span> <span class="fu">sub</span>(<span class="st">".*:</span><span class="sc">\\</span><span class="st">s*"</span>, <span class="st">""</span>, cheese_family),</span>
 <span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>      <span class="at">Country =</span> <span class="fu">sub</span>(<span class="st">".*:</span><span class="sc">\\</span><span class="st">s*"</span>, <span class="st">""</span>, cheese_country)</span>
 <span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>    <span class="co">#now, tryCatch kicks in, just in case there is any error</span></span>
-<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>  }, <span class="at">error =</span> <span class="cf">function</span>(error_message) {</span>
-<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>    <span class="co">#give warning message</span></span>
-<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">warning</span>(<span class="fu">paste</span>(<span class="st">"Failed to scrape cheese:"</span>, cheese, <span class="st">"-"</span>, error_message<span class="sc">$</span>message))</span>
-<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>    <span class="co"># return empty df</span></span>
-<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(</span>
-<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>      <span class="at">Name =</span> cheese,</span>
-<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>      <span class="at">Taste =</span> <span class="cn">NA_character_</span>,</span>
-<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>      <span class="at">Milk =</span> <span class="cn">NA_character_</span>,</span>
-<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>      <span class="at">Type =</span> <span class="cn">NA_character_</span>,</span>
-<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>      <span class="at">Family =</span> <span class="cn">NA_character_</span>,</span>
-<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>      <span class="at">Country =</span> <span class="cn">NA_character_</span></span>
-<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>  })</span>
-<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a><span class="co"># claude helped with editing original functions</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>  }, <span class="at">error =</span> <span class="cf">function</span>(error_message) {</span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Give a warning message if an error occurs</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">warning</span>(<span class="fu">paste</span>(<span class="st">"Failed to scrape cheese:"</span>, cheese, <span class="st">"-"</span>, error_message<span class="sc">$</span>message))</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return an empty data frame with NA values in case of an error</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(</span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>      <span class="at">Name =</span> cheese,</span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>      <span class="at">Taste =</span> <span class="cn">NA_character_</span>,</span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>      <span class="at">Milk =</span> <span class="cn">NA_character_</span>,</span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>      <span class="at">Type =</span> <span class="cn">NA_character_</span>,</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>      <span class="at">Family =</span> <span class="cn">NA_character_</span>,</span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>      <span class="at">Country =</span> <span class="cn">NA_character_</span></span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># apply single cheese function to one for multiple cheeses</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>scrape_cheeses <span class="ot">&lt;-</span> <span class="cf">function</span>(cheese_vec, base_url, <span class="at">delay =</span> <span class="dv">1</span>) {</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># check if vector and is 10 or less long</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.vector</span>(cheese_vec) <span class="sc">|</span> <span class="fu">length</span>(cheese_vec) <span class="sc">&gt;</span> <span class="dv">10</span>) {</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">"The input for `cheese_vec` must be a vector of cheese names of length 10 or lower!"</span>)</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># go through each cheese and apply the function</span></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">#used claude to remember the syntax for map, forgot you had to do .x</span></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map_dfr</span>(cheese_vec, <span class="sc">~</span>{</span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scrape_cheese</span>(.x, base_url, delay)</span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  })</span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># base URL</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>base_url <span class="ot">&lt;-</span> <span class="st">"https://www.cheese.com/"</span> </span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>cheese_list <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"brie"</span>, <span class="st">"gouda"</span>, <span class="st">"feta"</span>, <span class="st">"mozzarella"</span>, <span class="st">"camembert"</span>, <span class="st">"stilton"</span>, <span class="st">"ricotta"</span>, <span class="st">"limburger"</span>, <span class="st">"swag"</span>, <span class="st">"american-cheese"</span>)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>cheese_output <span class="ot">&lt;-</span> <span class="fu">scrape_cheeses</span>(cheese_list, base_url)</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>cheese_output <span class="sc">%&gt;%</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># base URL</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>base_url <span class="ot">&lt;-</span> <span class="st">"https://www.cheese.com/"</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>cheese_list <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"brie"</span>, <span class="st">"gouda"</span>, <span class="st">"feta"</span>, <span class="st">"mozzarella"</span>, <span class="st">"camembert"</span>, <span class="st">"stilton"</span>, <span class="st">"ricotta"</span>, <span class="st">"limburger"</span>, <span class="st">"swag"</span>, <span class="st">"american-cheese"</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Directly apply scrape_cheese to the cheese_list using map_dfr</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># The .x refers to each element in cheese_list as map_dfr iterates</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>cheese_output <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(cheese_list, <span class="sc">~</span><span class="fu">scrape_cheese</span>(.x, base_url, <span class="at">delay =</span> <span class="dv">1</span>))</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the output</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>cheese_output <span class="sc">%&gt;%</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="table caption-top table-sm table-striped small" data-quarto-postprocess="true">
 <thead>
@@ -10960,7 +10946,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="part-5-evaluation" class="level2">
 <h2 class="anchored" data-anchor-id="part-5-evaluation">Part 5 Evaluation</h2>
 <p>I think the functions are well-commented and explain what they are doing. The body is relatively easy to read. The parameter names are also informative at a baseline level. The output is generally predictable, with a tryCatch() and if statement to give errors in case something goes wrong. However, I do not think that these will catch every type of error or misused parameter that could be present in the function. The functions are also self contained.</p>
-<p>However, I think the efficiency could leave a little more to be desired. There is probably a way to just use one function to scrape multiple cheeses, instead of making one function to do one cheese and another to iterate through multiple cheeses. The substring method I used (sub()) might be able to be made into a helper function since it is repeated in a couple of places. The iteration I do have present seems efficient since it directly applies the existing function to a vector and outputs a data frame.</p>
+<p>I used mapping to apply the <code>scrape_cheese()</code> function to a vector of different cheeses. The substring method I used (sub()) might be able to be made into a helper function since it is repeated in a couple of places. The iteration I do have present seems efficient since it directly applies the existing function to a vector and outputs a data frame.</p>
 
 
 </section>

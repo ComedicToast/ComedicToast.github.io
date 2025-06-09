@@ -67,7 +67,7 @@
     "href": "portfolio/Lab 8 Post/index.html#part-5-evaluation",
     "title": "Lab 8 Blog Post",
     "section": "Part 5 Evaluation",
-    "text": "Part 5 Evaluation\nI think the functions are well-commented and explain what they are doing. The body is relatively easy to read. The parameter names are also informative at a baseline level. The output is generally predictable, with a tryCatch() and if statement to give errors in case something goes wrong. However, I do not think that these will catch every type of error or misused parameter that could be present in the function. The functions are also self contained.\nHowever, I think the efficiency could leave a little more to be desired. There is probably a way to just use one function to scrape multiple cheeses, instead of making one function to do one cheese and another to iterate through multiple cheeses. The substring method I used (sub()) might be able to be made into a helper function since it is repeated in a couple of places. The iteration I do have present seems efficient since it directly applies the existing function to a vector and outputs a data frame."
+    "text": "Part 5 Evaluation\nI think the functions are well-commented and explain what they are doing. The body is relatively easy to read. The parameter names are also informative at a baseline level. The output is generally predictable, with a tryCatch() and if statement to give errors in case something goes wrong. However, I do not think that these will catch every type of error or misused parameter that could be present in the function. The functions are also self contained.\nI used mapping to apply the scrape_cheese() function to a vector of different cheeses. The substring method I used (sub()) might be able to be made into a helper function since it is repeated in a couple of places. The iteration I do have present seems efficient since it directly applies the existing function to a vector and outputs a data frame."
   },
   {
     "objectID": "portfolio/Lab 9 Post/index.html",
@@ -131,5 +131,12 @@
     "title": "Lab 9 Blog Post",
     "section": "Description of code choices",
     "text": "Description of code choices\nThis piece was made by referring to the Polygon Tricks lesson by Danielle Navaro. Specifically, I took the smudged_hexagon() function and, using Claude for assistance, converted it to a smudged_circle_multi() function that could plot multiple circles at once. It uses the same helper functions as smudged_hexagon(), with insert_edge_l() slightly altered to accommodate for the circular shape instead of the hexagonal one.\nEach circle is given different properties to create the mask.\n\nThe brown outermost circle is given a (0,0) coordinate set so it is centered, and a radius of 1 so it is the biggest circle. The seed was messed around with until a suitable wispy pattern was found, and the noise values were set to the same default ones as were used in smudged_hexagon().\nThe golden circle is also given a (0,0) coordinate set to be centered, with a smaller radius than the previous circle so it would be inside of it. The noise values were a bit below the default ones since the shape is a little smaller.\nThe eyes are given different coordinate sets so that they would be off-center but mirrored horizontally. They have a much smaller radius than the previous two circles (dare I say, the rough size of eyes on a mask). The noise values are again a bit smaller since the shapes are smaller, and the number of points that create the base circle are reduced from 12 to 8 since smaller polygons having less edges isn’t as noticeable.\nThe mouth is given different coordinate sets as well, but is only moved downwards from the center. It has a slightly smaller radius than the eyes, but the polygon is stretched vertically to look more like a mouth shape. The noise3 value is set slightly higher than the eyes to give it a little more of the wispyness. n_points was again set to 8 for similar reasons as the eyes."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "ComedicToast",
+    "section": "",
+    "text": "This website is to host projects I have done in STAT 541."
   }
 ]
