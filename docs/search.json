@@ -11,7 +11,7 @@
     "href": "portfolio/Lab 6 Post/index.html",
     "title": "Lab 6 Blog Post",
     "section": "",
-    "text": "The exercises from the functions below were pulled from the newest version of R for Data Science. Specifically, from Chapters 25 and 26. For this “alternative” lab you will complete the exercises from the textbook, with the option of submitting a pull request to the repository for the textbook solutions.\nlibrary(tidyverse)\nlibrary(nycflights13)"
+    "text": "The exercises from the functions below were pulled from the newest version of R for Data Science. Specifically, from Chapters 25 and 26. For this “alternative” lab you will complete the exercises from the textbook, with the option of submitting a pull request to the repository for the textbook solutions.\nlibrary(tidyverse)\nlibrary(nycflights13)\nlibrary(lubridate)"
   },
   {
     "objectID": "portfolio/Lab 6 Post/index.html#data-frame-functions",

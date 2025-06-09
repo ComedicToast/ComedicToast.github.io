@@ -21,6 +21,7 @@ textbook, with the option of submitting a pull request to the
 #| message: false
 library(tidyverse)
 library(nycflights13)
+library(lubridate)
 ```
 
 
@@ -68,7 +69,7 @@ age_calc <- function(birthdates) {
   #get birthdays, today's date, divide by 365.25 to account for leap years
   birthdates <- as.Date(birthdates)
   today <- Sys.Date()
-  ages <- as.integer((today - birthdates) / 365.25) 
+  ages <- time_length(interval(birthdates, today), "years") 
   return(ages)
 }
 

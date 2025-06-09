@@ -245,41 +245,42 @@ obtain the following detailed information:
 (Just 10 to avoid overtaxing the website! Continue adding a 1 second pause
 between page queries.)
 
+
 ```{r}
+# Helper function to extract text content from a specified CSS selector on a webpage
+get_cheese_attribute <- function(webpage, css) {
+  result <- webpage %>%
+    html_elements(paste0(".", css, " p")) %>%
+    html_text(trim = TRUE)
+
+  # Return an empty string if nothing is found, otherwise return the first result
+  if (length(result) == 0) return("")
+  result[1]
+}
+
 # Function to scrape a single cheese
 scrape_cheese <- function(cheese, base_url, delay = 1) {
-  
-  #set up page url to grab 
+
+  # Set up page URL to grab
   page_url <- paste0(base_url, cheese, "/")
-  
-  #include sys delay so we don't overload the website
+
+  # Include system delay so we don't overload the website
   Sys.sleep(delay)
-  
-  # This is a cool new thing that Claude included in its revision. tryCatch handles errors pretty nicely
-  # It gives a structure to any errors that occurs and still gives a blank df as output
+
+  # tryCatch handles errors nicely, providing a structured way to manage them
+  # and still return a blank data frame as output in case of an error.
   tryCatch({
-    # read the webpage url
+    # Read the webpage URL
     webpage <- read_html(page_url)
-    
-    # helper function to grab from each css instead of copy pasting 5 blocks for each css
-    get_cheese_attribute <- function(css) {
-      result <- webpage %>%
-        html_elements(paste0(".", css, " p")) %>%
-        html_text(trim = TRUE)
-      
-      # return empty string if nothing is found
-      if(length(result) == 0) return("")
-      result[1]
-    }
-    
-    # grab and store every desired attribute
-    cheese_taste <- get_cheese_attribute("summary_taste")
-    cheese_milk <- get_cheese_attribute("summary_milk")
-    cheese_type <- get_cheese_attribute("summary_moisture_and_type")
-    cheese_family <- get_cheese_attribute("summary_family")
-    cheese_country <- get_cheese_attribute("summary_country")
-    
-    # return the dataframe with everything, with some additional string cutting
+
+    # Grab and store every desired attribute using the external helper function
+    cheese_taste <- get_cheese_attribute(webpage, "summary_taste")
+    cheese_milk <- get_cheese_attribute(webpage, "summary_milk")
+    cheese_type <- get_cheese_attribute(webpage, "summary_moisture_and_type")
+    cheese_family <- get_cheese_attribute(webpage, "summary_family")
+    cheese_country <- get_cheese_attribute(webpage, "summary_country")
+
+    # Return the data frame with all scraped attributes, with some additional string cutting
     data.frame(
       Name = cheese,
       Taste = sub(".*:\\s*", "", cheese_taste),
@@ -288,13 +289,12 @@ scrape_cheese <- function(cheese, base_url, delay = 1) {
       Family = sub(".*:\\s*", "", cheese_family),
       Country = sub(".*:\\s*", "", cheese_country)
     )
-    #now, tryCatch kicks in, just in case there is any error
   }, error = function(error_message) {
-    
-    #give warning message
+
+    # Give a warning message if an error occurs
     warning(paste("Failed to scrape cheese:", cheese, "-", error_message$message))
-    
-    # return empty df
+
+    # Return an empty data frame with NA values in case of an error
     data.frame(
       Name = cheese,
       Taste = NA_character_,
@@ -305,38 +305,26 @@ scrape_cheese <- function(cheese, base_url, delay = 1) {
     )
   })
 }
-# claude helped with editing original functions
 ```
 
-```{r}
-# apply single cheese function to one for multiple cheeses
-scrape_cheeses <- function(cheese_vec, base_url, delay = 1) {
-  
-  # check if vector and is 10 or less long
-  if (!is.vector(cheese_vec) | length(cheese_vec) > 10) {
-    stop("The input for `cheese_vec` must be a vector of cheese names of length 10 or lower!")
-  }
-  
-  # go through each cheese and apply the function
-  #used claude to remember the syntax for map, forgot you had to do .x
-  map_dfr(cheese_vec, ~{
-    scrape_cheese(.x, base_url, delay)
-  })
-  
-}
-```
 
 ```{r}
 #| warning: false
 # base URL
-base_url <- "https://www.cheese.com/" 
+base_url <- "https://www.cheese.com/"
 
 cheese_list <- c("brie", "gouda", "feta", "mozzarella", "camembert", "stilton", "ricotta", "limburger", "swag", "american-cheese")
-cheese_output <- scrape_cheeses(cheese_list, base_url)
+
+# Directly apply scrape_cheese to the cheese_list using map_dfr
+# The .x refers to each element in cheese_list as map_dfr iterates
+cheese_output <- map_dfr(cheese_list, ~scrape_cheese(.x, base_url, delay = 1))
+
+# Display the output
 cheese_output %>%
   kbl() %>%
   kable_styling()
 ```
+
 
 # Part 6
 
@@ -353,4 +341,4 @@ For part 4, I think the function is pretty efficient and well-structured. The ma
 
 I think the functions are well-commented and explain what they are doing. The body is relatively easy to read. The parameter names are also informative at a baseline level. The output is generally predictable, with a tryCatch() and if statement to give errors in case something goes wrong. However, I do not think that these will catch every type of error or misused parameter that could be present in the function. The functions are also self contained.
 
-However, I think the efficiency could leave a little more to be desired. There is probably a way to just use one function to scrape multiple cheeses, instead of making one function to do one cheese and another to iterate through multiple cheeses. The substring method I used (sub()) might be able to be made into a helper function since it is repeated in a couple of places. The iteration I do have present seems efficient since it directly applies the existing function to a vector and outputs a data frame.
+I used mapping to apply the `scrape_cheese()` function to a vector of different cheeses. The substring method I used (sub()) might be able to be made into a helper function since it is repeated in a couple of places. The iteration I do have present seems efficient since it directly applies the existing function to a vector and outputs a data frame.
