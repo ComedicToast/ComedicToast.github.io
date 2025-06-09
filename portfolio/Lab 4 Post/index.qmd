@@ -6,7 +6,7 @@ author:
     url: https://github.com/ComedicToast.io
 date: 5-4-2025
 categories: [Quarto, R] # self-defined categories
-image: thumbnail.png
+image: thumbnail2.png
 draft: false # setting this to `true` will prevent your post from appearing on your listing page until you're ready!
 ---
 
